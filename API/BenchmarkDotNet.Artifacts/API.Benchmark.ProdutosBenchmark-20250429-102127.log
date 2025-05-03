@@ -1,0 +1,4 @@
+// Validating benchmarks:
+// Benchmark ProdutosBenchmark.GetProdutosIEnumerable: ShortRun(IterationCount=3, LaunchCount=1, WarmupCount=3)
+//    * Benchmark ProdutosBenchmark.GetProdutosIEnumerable returns a deferred execution result (IEnumerable<Produto>). You need to either change the method declaration to return a materialized result or consume it on your own. You can use .Consume() extension method to do that.
+
