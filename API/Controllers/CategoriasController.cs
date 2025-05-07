@@ -11,35 +11,27 @@ namespace API.Controllers
     [Route("api/[controller]")]
     public class CategoriasController : ControllerBase
     {
-        private readonly ICategoriaRepository _repository;
+        private readonly IUnitOfWork _uof;
 
-        public CategoriasController(ICategoriaRepository repository)
+        public CategoriasController(IUnitOfWork uof)
         {
-            _repository = repository;
+            _uof = uof;
         }
 
         [HttpGet]
         [ServiceFilter(typeof(ApiLoggingFilter))]
         public ActionResult<IEnumerable<Categoria>> Get()
         {
-            var categorias = _repository.GetCategorias();
+            var categorias = _uof.CategoriaRepository.GetAll();
 
             return Ok(categorias);
-        }
-
-        [HttpGet("produtos")]
-        public ActionResult<IEnumerable<Categoria>> GetCategoriasProdutos()
-        {
-            var categoriasProdutos = _repository.GetCategorias();
-
-            return Ok(categoriasProdutos);
         }
 
         [HttpGet("{id:int}")]
         public ActionResult<Categoria> Get(int id)
         {
 
-            var categoria = _repository.GetCategoria(id);
+            var categoria = _uof.CategoriaRepository.Get(c => c.CategoriaId == id);
 
             if (categoria == null)
             {
@@ -55,7 +47,8 @@ namespace API.Controllers
             if(categoria is null)
                 return BadRequest("Dados inválidos");
 
-            var categoriaCriada = _repository.Create(categoria);
+            var categoriaCriada = _uof.CategoriaRepository.Create(categoria);
+            _uof.Commit();
 
             return new CreatedAtRouteResult("ObterCategoria", new { id = categoria.CategoriaId }, categoriaCriada );
         }
@@ -68,7 +61,8 @@ namespace API.Controllers
                 return BadRequest();
             }
 
-            _repository.Update(categoria);
+            _uof.CategoriaRepository.Update(categoria);
+            _uof.Commit();
 
             return Ok(categoria);
         }
@@ -76,13 +70,14 @@ namespace API.Controllers
         [HttpDelete("{id:int}")]
         public ActionResult<Categoria> Delete(int id)
         {
-            var categoria = _repository.GetCategoria(id);
+            var categoria = _uof.CategoriaRepository.Get(c => c.CategoriaId == id);
             if(categoria is null)
             {
                 return NotFound();
             }
 
-            var categoriaExcluida = _repository.Delete(id);
+            var categoriaExcluida = _uof.CategoriaRepository.Delete(categoria);
+            _uof.Commit();
 
             return Ok(categoriaExcluida);
         }

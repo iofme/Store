@@ -15,18 +15,30 @@ namespace API.Controllers
     [Route("api/[controller]")]
     public class ProdutosController : ControllerBase
     {
+        private readonly IUnitOfWork _uof;
 
-        private readonly IProdutoRepository _repository;
-
-        public ProdutosController(IProdutoRepository repository)
+        public ProdutosController(IUnitOfWork uof)
         {
-            _repository = repository;
+            _uof = uof;
+        }
+
+        [HttpGet("produtos/{id}")]
+        public ActionResult<IEnumerable<Produto>> GetProdutosCategoria(int id)
+        {
+            var produtos = _uof.ProdutoRepository.GetProdutosPorCategoria(id);
+
+            if(produtos is null)
+            {
+                return NotFound();
+            }
+
+            return Ok(produtos);
         }
 
         [HttpGet]
          public ActionResult<IEnumerable<Produto>> Get()
          {
-            var produtos = _repository.GetProdutos();
+            var produtos = _uof.ProdutoRepository.GetAll();
 
             if(produtos is null)
             {
@@ -37,7 +49,7 @@ namespace API.Controllers
         [HttpGet("{id:int}")]
          public ActionResult<Produto> Get(int id)
          {
-            var produtos = _repository.GetProduto(id);
+            var produtos = _uof.ProdutoRepository.Get(p => p.ProdutoId == id);
 
             if(produtos is null)
             {
@@ -52,7 +64,8 @@ namespace API.Controllers
             if(produto is null)
                 return BadRequest();
             
-            var novoProduto = _repository.Create(produto);
+            var novoProduto = _uof.ProdutoRepository.Create(produto);
+            _uof.Commit();
 
             return new CreatedAtRouteResult("OvjetProduto", new {id = novoProduto.ProdutoId}, novoProduto);
          }
@@ -65,29 +78,26 @@ namespace API.Controllers
                 return BadRequest();
             }
 
-            bool atualizado = _repository.Update(produto);
-
-            if(atualizado)
-            {
-                return Ok(produto);
-            }
-            else
-            {
-                return StatusCode(500, $"Falha ao atualizar o produtp de id = {id}");
-            }
+            var produtoAtualizado = _uof.ProdutoRepository.Update(produto);
+            _uof.Commit();
+            
+            return Ok(produtoAtualizado);
          }
 
          [HttpDelete("{id:int}")]
          public ActionResult Delete(int id)
          {
-            bool deletado = _repository.Delete(id);
-            if(deletado)
+            var produto = _uof.ProdutoRepository.Get(p => p.ProdutoId == id);
+
+            if(produto is null)
             {
-                return Ok($"Produto de id={id} foi excluido");
+                return NotFound("Produto não encontrado");
             }
-            else{
-                return StatusCode (500, $" Falaha ao excluir o produto de id={id}");
-            }
+
+            var produtoDeletado = _uof.ProdutoRepository.Delete(produto);
+            _uof.Commit();
+
+            return Ok(produtoDeletado);
          }
     }
 } 
