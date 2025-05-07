@@ -4,14 +4,22 @@ using API.Controllers;
 using API.Data;
 using API.Extensions;
 using API.Filtros;
+using API.Interface;
+using API.Logging;
+using API.Repository;
 using BenchmarkDotNet.Running;
+using Microsoft.Diagnostics.Tracing.Parsers.MicrosoftWindowsWPF;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers()
+builder.Services.AddControllers(opt => 
+    {
+     opt.Filters.Add(typeof(ApiExceptionFilter));
+    }
+    )
         .AddJsonOptions(opt => 
         opt.JsonSerializerOptions
         .ReferenceHandler = ReferenceHandler.IgnoreCycles);
@@ -30,6 +38,13 @@ if (args.Contains("--benchmark"))
 }
 
 builder.Services.AddScoped<ApiLoggingFilter>();
+builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>();
+builder.Services.AddScoped<IProdutoRepository, ProdutoRepository>();
+
+builder.Logging.AddProvider(new CustomLoggerProvider(new CustomLoggerProviderConfig 
+{
+    LogLevel = LogLevel.Information,
+}));
 
 var app = builder.Build();
 // Configure the HTTP request pipeline.

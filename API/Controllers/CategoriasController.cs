@@ -1,10 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Principal;
-using System.Threading.Tasks;
 using API.Data;
 using API.Filtros;
+using API.Interface;
 using API.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -15,31 +11,35 @@ namespace API.Controllers
     [Route("api/[controller]")]
     public class CategoriasController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly ICategoriaRepository _repository;
 
-        public CategoriasController(AppDbContext context)
+        public CategoriasController(ICategoriaRepository repository)
         {
-            _context = context;
+            _repository = repository;
         }
 
         [HttpGet]
         [ServiceFilter(typeof(ApiLoggingFilter))]
         public ActionResult<IEnumerable<Categoria>> Get()
         {
-            return _context.Categorias.ToList();
+            var categorias = _repository.GetCategorias();
+
+            return Ok(categorias);
         }
 
         [HttpGet("produtos")]
         public ActionResult<IEnumerable<Categoria>> GetCategoriasProdutos()
         {
-            return _context.Categorias.Include(p => p.Produtos).ToList();
+            var categoriasProdutos = _repository.GetCategorias();
+
+            return Ok(categoriasProdutos);
         }
 
         [HttpGet("{id:int}")]
         public ActionResult<Categoria> Get(int id)
         {
 
-            var categoria = _context.Categorias.FirstOrDefault(p => p.CategoriaId == id);
+            var categoria = _repository.GetCategoria(id);
 
             if (categoria == null)
             {
@@ -53,12 +53,11 @@ namespace API.Controllers
         public ActionResult Post(Categoria categoria)
         {
             if(categoria is null)
-                return BadRequest();
+                return BadRequest("Dados inválidos");
 
-            _context.Categorias.Add(categoria);
-            _context.SaveChanges();
+            var categoriaCriada = _repository.Create(categoria);
 
-            return new CreatedAtRouteResult("ObterCategoria", new { id = categoria.CategoriaId }, categoria);
+            return new CreatedAtRouteResult("ObterCategoria", new { id = categoria.CategoriaId }, categoriaCriada );
         }
 
         [HttpPut]
@@ -69,26 +68,23 @@ namespace API.Controllers
                 return BadRequest();
             }
 
-            _context.Entry(categoria).State = EntityState.Modified;
-            _context.SaveChanges();
+            _repository.Update(categoria);
 
-            return Ok();
+            return Ok(categoria);
         }
 
         [HttpDelete("{id:int}")]
         public ActionResult<Categoria> Delete(int id)
         {
-            var categoria = _context.Categorias.FirstOrDefault(p => p.CategoriaId == id);
-
+            var categoria = _repository.GetCategoria(id);
             if(categoria is null)
             {
                 return NotFound();
             }
 
-            _context.Categorias.Remove(categoria);
-            _context.SaveChanges();
+            var categoriaExcluida = _repository.Delete(id);
 
-            return Ok();
+            return Ok(categoriaExcluida);
         }
     }
 }

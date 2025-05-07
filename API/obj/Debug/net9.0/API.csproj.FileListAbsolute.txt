@@ -193,3 +193,4 @@ C:\Users\joao.burigo\Desktop\Project\store\api\bin\Debug\net9.0\runtimes\win-arm
 C:\Users\joao.burigo\Desktop\Project\store\api\bin\Debug\net9.0\runtimes\win-x64\native\capstone.dll
 C:\Users\joao.burigo\Desktop\Project\store\api\bin\Debug\net9.0\runtimes\win-x86\native\capstone.dll
 C:\Users\joao.burigo\Desktop\Project\store\api\bin\Debug\net9.0\runtimes\win\lib\netcoreapp2.0\System.Management.dll
+C:\Users\joao.burigo\Desktop\Project\store\api\obj\Debug\net9.0\API.sourcelink.json

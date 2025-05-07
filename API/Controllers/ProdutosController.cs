@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
+using API.Interface;
 using API.Models;
 using BenchmarkDotNet.Attributes;
 using Microsoft.AspNetCore.Mvc;
@@ -15,32 +16,34 @@ namespace API.Controllers
     public class ProdutosController : ControllerBase
     {
 
-        private readonly AppDbContext _context;
+        private readonly IProdutoRepository _repository;
 
-        public ProdutosController(AppDbContext context){
-            _context = context;
+        public ProdutosController(IProdutoRepository repository)
+        {
+            _repository = repository;
         }
+
         [HttpGet]
          public ActionResult<IEnumerable<Produto>> Get()
          {
-            var produtos = _context.Produtos.ToList();
+            var produtos = _repository.GetProdutos();
 
             if(produtos is null)
             {
                 return NotFound("Produtos não encontrados");
             }
-            return produtos;
+            return Ok(produtos);
          }
         [HttpGet("{id:int}")]
          public ActionResult<Produto> Get(int id)
          {
-            var produtos = _context.Produtos.FirstOrDefault(p => p.ProdutoId == id);
+            var produtos = _repository.GetProduto(id);
 
             if(produtos is null)
             {
                 return NotFound("Produto não encontrado");
             }
-            return produtos;
+            return Ok(produtos);
          }
 
          [HttpPost]
@@ -49,10 +52,9 @@ namespace API.Controllers
             if(produto is null)
                 return BadRequest();
             
-            _context.Produtos.Add(produto);
-            _context.SaveChanges();
+            var novoProduto = _repository.Create(produto);
 
-            return new CreatedAtRouteResult("OvjetProduto", new {id = produto.ProdutoId}, produto);
+            return new CreatedAtRouteResult("OvjetProduto", new {id = novoProduto.ProdutoId}, novoProduto);
          }
 
          [HttpPut("{id:int}")]
@@ -63,24 +65,29 @@ namespace API.Controllers
                 return BadRequest();
             }
 
-            _context.Entry(produto).State = EntityState.Modified;
-            _context.SaveChanges();
+            bool atualizado = _repository.Update(produto);
 
-            return Ok(produto);
+            if(atualizado)
+            {
+                return Ok(produto);
+            }
+            else
+            {
+                return StatusCode(500, $"Falha ao atualizar o produtp de id = {id}");
+            }
          }
 
          [HttpDelete("{id:int}")]
          public ActionResult Delete(int id)
          {
-            var produto = _context.Produtos.FirstOrDefault(p => p.ProdutoId == id);
-
-            if(produto is null)
-                return NotFound("Produto não localizado");
-
-            _context.Produtos.Remove(produto);
-            _context.SaveChanges();
-
-            return Ok();
+            bool deletado = _repository.Delete(id);
+            if(deletado)
+            {
+                return Ok($"Produto de id={id} foi excluido");
+            }
+            else{
+                return StatusCode (500, $" Falaha ao excluir o produto de id={id}");
+            }
          }
     }
 } 
