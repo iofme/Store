@@ -1,6 +1,5 @@
 using System.Text.Json.Serialization;
 using API.Benchmark;
-using API.Controllers;
 using API.Data;
 using API.Extensions;
 using API.Filtros;
@@ -8,7 +7,6 @@ using API.Interface;
 using API.Logging;
 using API.Repository;
 using BenchmarkDotNet.Running;
-using Microsoft.Diagnostics.Tracing.Parsers.MicrosoftWindowsWPF;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,7 +20,7 @@ builder.Services.AddControllers(opt =>
     )
         .AddJsonOptions(opt => 
         opt.JsonSerializerOptions
-        .ReferenceHandler = ReferenceHandler.IgnoreCycles);
+        .ReferenceHandler = ReferenceHandler.IgnoreCycles).AddNewtonsoftJson();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
@@ -47,6 +45,8 @@ builder.Logging.AddProvider(new CustomLoggerProvider(new CustomLoggerProviderCon
 {
     LogLevel = LogLevel.Information,
 }));
+
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 var app = builder.Build();
 // Configure the HTTP request pipeline.

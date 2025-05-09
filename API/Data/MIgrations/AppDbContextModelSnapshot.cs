@@ -74,8 +74,8 @@ namespace API.Data.MIgrations
 
                     b.Property<string>("Nome")
                         .IsRequired()
-                        .HasMaxLength(80)
-                        .HasColumnType("nvarchar(80)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<decimal>("Preco")
                         .HasColumnType("decimal(10,2)");

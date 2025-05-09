@@ -1,9 +1,13 @@
 using API.Data;
+using API.DTOs;
 using API.Filtros;
+using API.Helpers;
 using API.Interface;
 using API.Models;
+using API.Pagination;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 namespace API.Controllers
 {
@@ -25,6 +29,41 @@ namespace API.Controllers
             var categorias = _uof.CategoriaRepository.GetAll();
 
             return Ok(categorias);
+        }
+
+        [HttpGet("pagination")]
+        public ActionResult<IEnumerable<CategoriaDTO>> Get([FromQuery] CategoriasParameters categoriasParameters)
+        {
+            var categorias = _uof.CategoriaRepository.GetCategorias(categoriasParameters);
+
+            return ObterCategorias(categorias);
+        }
+
+        private ActionResult<IEnumerable<CategoriaDTO>> ObterCategorias(PagedList<Categoria> categorias)
+        {
+            var metadata = new
+            {
+                categorias.TotalCount,
+                categorias.PageSize,
+                categorias.CurrentPage,
+                categorias.TotalPages,
+                categorias.HasNext,
+                categorias.HasPrevious
+            };
+
+            Response.Headers.Append("X-Pagination", JsonConvert.SerializeObject(metadata));
+
+            var categoriaDto = categorias.ToCategoriaDTOList();
+
+            return Ok(categoriaDto);
+        }
+
+        [HttpGet("filter/nome/pagination")]
+        public ActionResult<IEnumerable<CategoriaDTO>> GetCategoriasFiltradas([FromQuery] CategoriasFiltroNome categoriasFiltro)
+        {
+            var categorias = _uof.CategoriaRepository.GetCategoriasFiltroNome(categoriasFiltro);
+
+            return ObterCategorias(categorias);
         }
 
         [HttpGet("{id:int}")]

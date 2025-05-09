@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.MIgrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250417153435_PopulaProduto")]
-    partial class PopulaProduto
+    [Migration("20250509114957_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -77,8 +77,8 @@ namespace API.Data.MIgrations
 
                     b.Property<string>("Nome")
                         .IsRequired()
-                        .HasMaxLength(80)
-                        .HasColumnType("nvarchar(80)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<decimal>("Preco")
                         .HasColumnType("decimal(10,2)");
