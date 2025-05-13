@@ -31,7 +31,7 @@ namespace API.Repository
             }
         }
 
-        public void Commit()
+        public async Task CommitAsync()
         {
             _context.SaveChanges();
         }

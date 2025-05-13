@@ -9,9 +9,9 @@ namespace API.Interface
 {
     public interface IProdutoRepository : IRepository<Produto>
     {
-        PagedList<Produto> GetProdutos(ProdutosParameters produtosParams);
-        PagedList<Produto> GetProdutosFiltroPreco(ProdutosFiltrosPreco produtosFiltrosPreco);
-        IEnumerable<Produto> GetProdutosPorCategoria(int id);
+        Task<PagedList<Produto>> GetProdutosAsync(ProdutosParameters produtosParams);
+        Task<PagedList<Produto>> GetProdutosFiltroPrecoAsync(ProdutosFiltrosPreco produtosFiltrosPreco);
+        Task<IEnumerable<Produto>> GetProdutosPorCategoriaAsync(int id);
 
     }
 }

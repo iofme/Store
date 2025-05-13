@@ -9,7 +9,7 @@ namespace API.Interface
 {
     public interface ICategoriaRepository : IRepository<Categoria>
     {
-        PagedList<Categoria> GetCategorias(CategoriasParameters categoriasParameters);
-        PagedList<Categoria> GetCategoriasFiltroNome(CategoriasFiltroNome categoriaParams);
+        Task<PagedList<Categoria>> GetCategoriasAsync(CategoriasParameters categoriasParameters);
+        Task<PagedList<Categoria>> GetCategoriasFiltroNomeAsync(CategoriasFiltroNome categoriaParams);
     }
-}
+} 
