@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using X.PagedList;
 
 namespace API.Controllers
 {
@@ -53,16 +54,16 @@ namespace API.Controllers
             return ObterProdutos(produto);
         }
 
-        private ActionResult<IEnumerable<ProdutoDTO>> ObterProdutos(PagedList<Produto> produto)
+        private ActionResult<IEnumerable<ProdutoDTO>> ObterProdutos(IPagedList<Produto> produto)
         {
             var metadata = new
             {
-                produto.TotalCount,
+                produto.Count,
                 produto.PageSize,
-                produto.CurrentPage,
-                produto.TotalPages,
-                produto.HasNext,
-                produto.HasPrevious
+                produto.PageCount,
+                produto.TotalItemCount,
+                produto.HasNextPage,
+                produto.HasPreviousPage
             };
 
             Response.Headers.Append("X-Pagination", JsonConvert.SerializeObject(metadata));

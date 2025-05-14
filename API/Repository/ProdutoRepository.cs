@@ -6,6 +6,7 @@ using API.Data;
 using API.Interface;
 using API.Models;
 using API.Pagination;
+using X.PagedList;
 
 namespace API.Repository
 {
@@ -16,18 +17,18 @@ namespace API.Repository
 
         }
 
-        public async Task<PagedList<Produto>> GetProdutosAsync(ProdutosParameters produtosParams)
+        public async Task<IPagedList<Produto>> GetProdutosAsync(ProdutosParameters produtosParams)
         {
             var produtos = await GetAllAsync();
 
             var produtosOrdenados = produtos.OrderBy(p => p.ProdutoId).AsQueryable();
 
-            var resultado = PagedList<Produto>.ToPagedList(produtosOrdenados, produtosParams.PageNumber, produtosParams.PageSize);
+            var resultado = await produtosOrdenados.ToPagedListAsync(produtosParams.PageNumber, produtosParams.PageSize);
 
             return resultado;
         }
 
-        public async Task<PagedList<Produto>> GetProdutosFiltroPrecoAsync(ProdutosFiltrosPreco produtosFiltroParams)
+        public async Task<IPagedList<Produto>> GetProdutosFiltroPrecoAsync(ProdutosFiltrosPreco produtosFiltroParams)
         {
             var produtos = await GetAllAsync();
 
@@ -46,7 +47,7 @@ namespace API.Repository
                     produtos = produtos.Where(p => p.Preco == produtosFiltroParams.Preco.Value).OrderBy(p => p.Preco);
                 }
             }
-            var produtosFiltrados = PagedList<Produto>.ToPagedList(produtos.AsQueryable(), produtosFiltroParams.PageNumber, produtosFiltroParams.PageSize);
+            var produtosFiltrados = await produtos.ToPagedListAsync(produtosFiltroParams.PageNumber, produtosFiltroParams.PageSize);
 
             return produtosFiltrados;
         }

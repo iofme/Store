@@ -7,6 +7,7 @@ using API.Interface;
 using API.Models;
 using API.Pagination;
 using Microsoft.EntityFrameworkCore;
+using X.PagedList;
 
 namespace API.Repository
 {
@@ -17,18 +18,20 @@ namespace API.Repository
             
         }
 
-        public async Task<PagedList<Categoria>> GetCategoriasAsync(CategoriasParameters categoriasParameters)
+        public async Task<IPagedList<Categoria>> GetCategoriasAsync(CategoriasParameters categoriasParameters)
         {
             var categorias = await GetAllAsync();
 
             var categoriasOrdenadas = categorias.OrderBy(p => p.CategoriaId).AsQueryable();
 
-            var resultado = PagedList<Categoria>.ToPagedList(categoriasOrdenadas, categoriasParameters.PageNumber, categoriasParameters.PageSize);
+            //var resultado = PagedList<Categoria>.ToPagedList(categoriasOrdenadas, categoriasParameters.PageNumber, categoriasParameters.PageSize);
+
+            var resultado = await categoriasOrdenadas.ToPagedListAsync(categoriasParameters.PageNumber, categoriasParameters.PageSize);
 
             return resultado;
         }
 
-        public async Task<PagedList<Categoria>> GetCategoriasFiltroNomeAsync(CategoriasFiltroNome categoriaParams)
+        public async Task<IPagedList<Categoria>> GetCategoriasFiltroNomeAsync(CategoriasFiltroNome categoriaParams)
         {
             var categorias = await GetAllAsync();
 
@@ -37,7 +40,9 @@ namespace API.Repository
                 categorias = categorias.Where(c => c.Nome.Contains(categoriaParams.Nome));
             }
 
-            var categoriasFiltradas = PagedList<Categoria>.ToPagedList(categorias.AsQueryable(), categoriaParams.PageNumber, categoriaParams.PageSize);
+            //var categoriasFiltradas = PagedList<Categoria>.ToPagedList(categorias.AsQueryable(), categoriaParams.PageNumber, categoriaParams.PageSize);
+            
+            var categoriasFiltradas = await categorias.ToPagedListAsync(categoriaParams.PageNumber, categoriaParams.PageSize);
 
             return categoriasFiltradas; 
         }
