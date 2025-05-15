@@ -10,6 +10,7 @@ using API.Pagination;
 using AutoMapper;
 using Azure;
 using BenchmarkDotNet.Attributes;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -81,6 +82,7 @@ namespace API.Controllers
             return ObterProdutos(produtos);
         }
 
+        [Authorize]
         [HttpGet]
          public async Task<ActionResult<IEnumerable<ProdutoDTO>>> Get()
          {

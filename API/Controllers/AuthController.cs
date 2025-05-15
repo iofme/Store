@@ -1,12 +1,9 @@
-using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using API.DTOs;
 using API.Interface;
 using API.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -124,7 +121,7 @@ namespace API.Controllers
                 return BadRequest("Invalid access token/refresh token");
             }
 
-            string username = principal.Identity.Name;
+            string username = principal.Identity.Name!;
 
             var user = await _userManager.FindByNameAsync(username!);
 
@@ -144,6 +141,25 @@ namespace API.Controllers
                 accessToken = new JwtSecurityTokenHandler().WriteToken(newAccessToken),
                 refreshToken = newRefreshToken
             });
+        }
+        
+        [Authorize]
+        [HttpPost]
+        [Route("revoke/{username}")]
+        public async Task<IActionResult> Revoke(string username)
+        {
+            var user = await _userManager.FindByNameAsync(username);
+            
+            if(user is null)
+            {
+                return BadRequest("Invalid user name");
+            }
+
+            user.RefreshToken = null;
+
+            await _userManager.UpdateAsync(user);
+
+            return NoContent();
         }
     }
 }

@@ -17,3 +17,21 @@ Information: 0 - 10:38:43
 Information: 0 - Status Code: 200
 Information: 0 - #####################################################################
 Information: 0 - Application is shutting down...
+Critical: 6 - Application startup exception
+Error: 11 - Hosting failed to start
+Critical: 6 - Application startup exception
+Error: 11 - Hosting failed to start
+Information: 14 - Now listening on: http://localhost:5202
+Information: 0 - Application started. Press Ctrl+C to shut down.
+Information: 0 - Hosting environment: Development
+Information: 0 - Content root path: C:\Users\joao.burigo\Desktop\Project\store\api
+Warning: 3 - Failed to determine the https port for redirect.
+Information: 20101 - Executed DbCommand (36ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+SELECT [p].[ProdutoId], [p].[CategoriaId], [p].[DataCadastro], [p].[Descricao], [p].[Estoque], [p].[ImagemUrl], [p].[Nome], [p].[Preco]
+FROM [Produtos] AS [p]
+Information: 0 - Application is shutting down...
+Information: 14 - Now listening on: http://localhost:5202
+Information: 0 - Application started. Press Ctrl+C to shut down.
+Information: 0 - Hosting environment: Development
+Information: 0 - Content root path: C:\Users\joao.burigo\Desktop\Project\store\api
+Warning: 3 - Failed to determine the https port for redirect.

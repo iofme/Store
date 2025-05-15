@@ -30,13 +30,13 @@ builder.Services.AddControllers(opt =>
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-builder.Services.AddAuthentication("Bearer").AddJwtBearer();
+// Removida a linha duplicada: builder.Services.AddAuthentication("Bearer").AddJwtBearer();
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
             .AddEntityFrameworkStores<AppDbContext>()
             .AddDefaultTokenProviders();
 
-var secretKey = builder.Configuration["JWT: SecretKey"]
+var secretKey = builder.Configuration["JWT:SecretKey"]
 									?? throw new ArgumentException("Invalid secret key!!");
 
 builder.Services.AddAuthentication(options =>
@@ -96,7 +96,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
- 
+
+// Não esqueça de adicionar o middleware de autenticação antes da autorização
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
