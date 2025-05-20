@@ -6,6 +6,7 @@ using API.Helpers;
 using API.Interface;
 using API.Models;
 using API.Pagination;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -111,10 +112,11 @@ namespace API.Controllers
         }
 
         [HttpDelete("{id:int}")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<ActionResult<Categoria>> Delete(int id)
         {
             var categoria = await _uof.CategoriaRepository.Get(c => c.CategoriaId == id);
-            if(categoria is null)
+            if (categoria is null)
             {
                 return NotFound();
             }

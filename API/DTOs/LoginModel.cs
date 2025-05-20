@@ -9,9 +9,8 @@ namespace API.DTOs
     public class LoginModel
     {
         [Required(ErrorMessage = "Username is required")]
-        public string? Usename { get; set; }
+        public string? Username { get; set; }
         [Required(ErrorMessage = "Password is required")]
         public string? Password { get; set; }
-        public object UserName { get; internal set; }
     }
 }

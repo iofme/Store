@@ -41,24 +41,32 @@ var secretKey = builder.Configuration["JWT:SecretKey"]
 
 builder.Services.AddAuthentication(options =>
 {
-	options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-	options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer(options =>
 {
-	options.SaveToken = true;
-	options.RequireHttpsMetadata = false;
-	options.TokenValidationParameters = new TokenValidationParameters()
-	{
-		ValidateIssuer = true,
-		ValidateAudience = true,
-		ValidateLifetime = true,
-		ValidateIssuerSigningKey = true,
-		ClockSkew = TimeSpan.Zero,
-		ValidAudience = builder.Configuration["JWT:ValidAudience"],
-		ValidIssuer = builder.Configuration["JWT:ValidIssuer"],
-		IssuerSigningKey = new SymmetricSecurityKey(
-											 Encoding.UTF8.GetBytes(secretKey))
-	};
+    options.SaveToken = true;
+    options.RequireHttpsMetadata = false;
+    options.TokenValidationParameters = new TokenValidationParameters()
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ClockSkew = TimeSpan.Zero,
+        ValidAudience = builder.Configuration["JWT:ValidAudience"],
+        ValidIssuer = builder.Configuration["JWT:ValidIssuer"],
+        IssuerSigningKey = new SymmetricSecurityKey(
+                                             Encoding.UTF8.GetBytes(secretKey))
+    };
+});
+
+builder.Services.AddAuthorization(opt =>
+{
+    opt.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+    opt.AddPolicy("SuperAdminOnly", policy => policy.RequireRole("Admin").RequireClaim("id", "macoratti"));
+    opt.AddPolicy("UserOnly", policy => policy.RequireRole("User"));
+    opt.AddPolicy("ExclusiveOnly", policy => policy.RequireAssertion(context => context.User.HasClaim(claim => claim.Type == "id" && claim.Value == "macoratti") || context.User.IsInRole("SuperAdmin")));
 });
 
 builder.Services.AddDbContext<AppDbContext>(opt =>
@@ -85,6 +93,16 @@ builder.Logging.AddProvider(new CustomLoggerProvider(new CustomLoggerProviderCon
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
+var OrigensComAcessoPermitido = "_origensComAcessoPermitido";
+
+builder.Services.AddCors(options =>
+    options.AddPolicy(name: OrigensComAcessoPermitido,
+    policy =>
+    {
+        policy.WithOrigins("http://www.apirequest.io");
+    }
+    ));
+
 var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -96,8 +114,11 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseRouting();
 
-// Não esqueça de adicionar o middleware de autenticação antes da autorização
+app.UseCors(OrigensComAcessoPermitido);
+
 app.UseAuthentication();
 app.UseAuthorization();
 
