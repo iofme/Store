@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json.Serialization;
+using System.Threading.RateLimiting;
 using API.Benchmark;
 using API.Data;
 using API.Extensions;
@@ -12,6 +13,7 @@ using API.Services;
 using BenchmarkDotNet.Running;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
@@ -79,6 +81,22 @@ if (args.Contains("--benchmark"))
     return; // Encerra a aplicação após os benchmarks
 }
 
+builder.Services.AddRateLimiter(opt =>
+{
+	opt.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+	opt.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpcontext =>
+											RateLimitPartition.GetFixedWindowLimiter(
+																					partitionKey: httpcontext.User.Identity?.Name ??
+																												httpcontext.Request.Headers.Host.ToString(),
+											factory: partition => new FixedWindowRateLimiterOptions
+											{
+												AutoReplenishment = true,
+												PermitLimit = 5,
+												QueueLimit = 0,
+												Window = TimeSpan.FromSeconds(10)
+											}));
+});
+
 builder.Services.AddScoped<ApiLoggingFilter>();
 builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>();
 builder.Services.AddScoped<IProdutoRepository, ProdutoRepository>();
@@ -116,6 +134,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+app.UseRateLimiter();
 
 app.UseCors(OrigensComAcessoPermitido);
 
